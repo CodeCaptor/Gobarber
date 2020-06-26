@@ -25,5 +25,5 @@ yarn-error.log*
 
 
 #media
-.png
-.jpg
+*.png
+*.jpg
