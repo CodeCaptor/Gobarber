@@ -1,7 +1,16 @@
+import * as Yup from 'yup';
 import User from '../models/User';
 
 class UserController {
     async store(req, res) {
+        const schema = Yup.object().shape({
+            name: Yup.string().required(),
+            enamil: Yup.string().email().required(),
+            password: Yup.string().min(6).required(),
+        });
+        if (!(await schema.isValid(req.body))) {
+            return res.status(400).json({ error: 'Validation Fails' });
+        }
         const userExists = await User.findOne({
             where: { email: req.body.email },
         });
@@ -18,6 +27,18 @@ class UserController {
     }
 
     async update(req, res) {
+        const schema = Yup.object().shape({
+            name: Yup.string().notRequired(),
+            enamil: Yup.string().email().notRequired(),
+            password: Yup.string().min(6).notRequired(),
+            newPassword: Yup.string().min(6).when('password', (password, field) => password? field.required(): field),
+            confirmNewPassword: Yup.string().min(6).when('newPassword', (newPassword, field) =>
+                newPassword? field.required().oneOf([Yup.ref('newPassword')]) : field.notRequired()
+            )
+        });
+        if (!(await schema.isValid(req.body))) {
+            return res.status(400).json({ error: 'Validation Fails' });
+        }
         const { email, password } = req.body;
         const user = await User.findByPk(req.userID);
 
@@ -28,10 +49,11 @@ class UserController {
             }
         }
         if (password && !(await user.checkPassword(password))) {
-            return res.status(401).json({error: "Wrong old password"});
+            return res.status(401).json({ error: 'Wrong old password' });
         }
-        const {id, name, provider} = await user.update(req.body);
-        return res.json({id, name, provider});
+        req.body.password = req.body.newPassword;
+        const { id, name, provider } = await user.update(req.body);
+        return res.json({ id, name, provider });
     }
 }
 
