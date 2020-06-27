@@ -31,27 +31,40 @@ class UserController {
             name: Yup.string().notRequired(),
             enamil: Yup.string().email().notRequired(),
             password: Yup.string().min(6).notRequired(),
-            newPassword: Yup.string().min(6).when('password', (password, field) => password? field.required(): field),
-            confirmNewPassword: Yup.string().min(6).when('newPassword', (newPassword, field) =>
-                newPassword? field.required().oneOf([Yup.ref('newPassword')]) : field.notRequired()
-            )
+            newPassword: Yup.string()
+                .min(6)
+                .when('password', (password, field) =>
+                    password ? field.required() : field
+                ),
+            confirmNewPassword: Yup.string()
+                .min(6)
+                .when('newPassword', (newPassword, field) =>
+                    newPassword
+                        ? field.required().oneOf([Yup.ref('newPassword')])
+                        : field.notRequired()
+                ),
         });
         if (!(await schema.isValid(req.body))) {
             return res.status(400).json({ error: 'Validation Fails' });
         }
-        const { email, password } = req.body;
+        const { password } = req.body;
         const user = await User.findByPk(req.userID);
 
-        if (user !== user.email) {
-            const userExists = await User.findOne({ where: { email } });
-            if (userExists) {
+        if (req.body.email) {
+            const { email } = req.body;
+            const emailExists = await User.findOne({ where: { email } });
+            if (emailExists) {
                 return res.status(400).json({ error: 'Email in use' });
             }
         }
-        if (password && !(await user.checkPassword(password))) {
-            return res.status(401).json({ error: 'Wrong old password' });
+
+        if (req.body.password) {
+            if (password && !(await user.checkPassword(password))) {
+                return res.status(401).json({ error: 'Wrong old password' });
+            }
+            req.body.password = req.body.newPassword;
         }
-        req.body.password = req.body.newPassword;
+
         const { id, name, provider } = await user.update(req.body);
         return res.json({ id, name, provider });
     }
