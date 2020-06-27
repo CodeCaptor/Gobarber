@@ -16,6 +16,6 @@ return queryInterface.addColumn(
   },
 
   down: queryInterface => {
-return queryInterface.removeColumn('user', 'avatar_id');
+return queryInterface.removeColumn('users', 'avatar_id');
   }
 };
