@@ -1,8 +1,10 @@
 import * as Yup from 'yup'
-import {startOfHour, parseISO, isBefore} from 'date-fns'
- import Appointment from '../models/Appointment'
+import {startOfHour, parseISO, isBefore, format} from 'date-fns'
+import pt from 'date-fns/locale/pt'
+import Appointment from '../models/Appointment'
 import User from '../models/User'
 import File from '../models/File'
+import Notification from '../schemas/Notification'
 
 class AppointmentController {
     async store(req, res) {
@@ -16,21 +18,28 @@ class AppointmentController {
         }
         const {provider_id, date} = req.body;
         /*
-        * check if provider_id is a provider
+        * Check if provider_id is a provider
         */
         const isProvider = await User.findOne({where: {id: provider_id, provider: true}});
         if(!isProvider) {
             return res.status(401).json({error: "Unauthorized"});
         }
         /*
-        * check for past dates
+        * Check if provider_id is different from userID
+        */
+       if(req.userID === provider_id) {
+        return res.status(401).json({error: "you cannot make a self appointment"});
+       }
+
+        /*
+        * Check for past dates
         */
         const hourStart = startOfHour(parseISO(date));
         if(isBefore(hourStart, new Date())) {
             return res.status(400).json({error: "Past dates are not permited"});
         }
         /*
-        * check for availability
+        * Check for availability
         */
        const checkAvailability = await Appointment.findOne({where: {provider_id, canceled_at: null, date: hourStart}})
        if(checkAvailability) {
@@ -41,7 +50,16 @@ class AppointmentController {
             user_id: req.userID,
             provider_id,
             date: hourStart
-        })
+        });
+        /*
+        *   Notify provider
+        */
+       const user = await User.findByPk(req.userID);
+       const formattedDate = format(hourStart, "'dia' dd 'de' MMMM', às ' H:mm'h'", {locale: pt})
+       await Notification.create({
+           content: `Novo agendamento de ${user.name} para ${formattedDate}`,
+           user: provider_id,
+       });
         return res.json(appointment);
     }
 
