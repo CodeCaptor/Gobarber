@@ -28,6 +28,7 @@ routes.get('/providers',authMiddleware, ProviderController.index);
 
 routes.get('/appointments',authMiddleware, AppointmentController.index);
 routes.post('/appointments',authMiddleware, AppointmentController.store);
+routes.delete('/appointments/:id',authMiddleware, AppointmentController.delete);
 
 
 routes.post('/appointments',authMiddleware, AppointmentController.store);
@@ -35,6 +36,7 @@ routes.post('/appointments',authMiddleware, AppointmentController.store);
 routes.get('/schedule',authMiddleware, ScheduleController.index);
 
 routes.get('/notifications',authMiddleware, NotificationController.index);
+routes.put('/notifications/:id',authMiddleware, NotificationController.update);
 
 
 export default routes;
