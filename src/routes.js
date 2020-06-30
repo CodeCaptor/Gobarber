@@ -11,6 +11,7 @@ import ProviderController from './app/controllers/ProviderController';
 import AppointmentController from './app/controllers/AppointmentController';
 import ScheduleController from './app/controllers/ScheduleController';
 import NotificationController from './app/controllers/NotificationController';
+import AvaiableController from './app/controllers/AvaiableController';
 
 
 const upload = multer(multerConfig);
@@ -25,6 +26,8 @@ routes.post('/sessions', SessionController.store);
 routes.post('/files', authMiddleware, upload.single('file'), FileController.store);
 
 routes.get('/providers',authMiddleware, ProviderController.index);
+routes.get('/providers/:providerID/avaiable',authMiddleware, AvaiableController.index);
+
 
 routes.get('/appointments',authMiddleware, AppointmentController.index);
 routes.post('/appointments',authMiddleware, AppointmentController.store);
