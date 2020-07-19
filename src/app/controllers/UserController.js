@@ -10,6 +10,10 @@ class UserController {
     const { id, name, email, provider } = user;
     return res.json({ id, name, email, provider });
   }
+
+  async update(req, res) {
+    return res.json({ ok: true });
+  }
 }
 
 export default new UserController();
