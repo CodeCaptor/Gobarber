@@ -25,6 +25,11 @@ routes.post('/sessions', SessionController.store);
 
 routes.post('/appointments', AuthMiddleware, AppointmentController.store);
 routes.get('/appointments', AuthMiddleware, AppointmentController.index);
+routes.delete(
+  '/appointments/:id',
+  AuthMiddleware,
+  AppointmentController.delete
+);
 
 routes.get('/schedules', AuthMiddleware, ScheduleController.index);
 
