@@ -3,11 +3,12 @@ import { Router } from 'express';
 import multer from 'multer';
 import multerConfig from './config/multer';
 
+import AuthMiddleware from './app/middlewares/AuthMiddleware';
 import UserController from './app/controllers/UserController';
 import FileController from './app/controllers/FileController';
 import SessionController from './app/controllers/SessionController';
-import AuthMiddleware from './app/middlewares/AuthMiddleware';
 import ProviderController from './app/controllers/ProviderController';
+import AppointmentController from './app/controllers/AppointmentController';
 
 const routes = Router();
 const upload = multer(multerConfig);
@@ -15,9 +16,12 @@ const upload = multer(multerConfig);
 routes.post('/users', UserController.store);
 routes.put('/users', AuthMiddleware, UserController.update);
 routes.get('/users', UserController.index);
+
 routes.get('/providers', AuthMiddleware, ProviderController.index);
 
 routes.post('/sessions', SessionController.store);
+
+routes.post('/appointments', AuthMiddleware, AppointmentController.store);
 
 routes.post(
   '/files',
