@@ -22,6 +22,7 @@ routes.get('/providers', AuthMiddleware, ProviderController.index);
 routes.post('/sessions', SessionController.store);
 
 routes.post('/appointments', AuthMiddleware, AppointmentController.store);
+routes.get('/appointments', AuthMiddleware, AppointmentController.index);
 
 routes.post(
   '/files',
