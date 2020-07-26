@@ -14,11 +14,20 @@ import ScheduleController from './app/controllers/ScheduleController';
 import NotificationController from './app/controllers/NotificationController';
 import AvaiableController from './app/controllers/AvaiableController';
 
+import UserValidator from './app/validators/UserValidator';
+import SessionValidator from './app/validators/SessionValidator';
+import AppointmentValidator from './app/validators/AppointmentValidator';
+
 const routes = Router();
 const upload = multer(multerConfig);
 
-routes.post('/users', UserController.store);
-routes.put('/users', AuthMiddleware, UserController.update);
+routes.post('/users', UserValidator.store, UserController.store);
+routes.put(
+  '/users',
+  AuthMiddleware,
+  UserValidator.update,
+  UserController.update
+);
 routes.get('/users', UserController.index);
 
 routes.get('/providers', AuthMiddleware, ProviderController.index);
@@ -28,9 +37,14 @@ routes.get(
   AvaiableController.index
 );
 
-routes.post('/sessions', SessionController.store);
+routes.post('/sessions', SessionValidator.store, SessionController.store);
 
-routes.post('/appointments', AuthMiddleware, AppointmentController.store);
+routes.post(
+  '/appointments',
+  AuthMiddleware,
+  AppointmentValidator.store,
+  AppointmentController.store
+);
 routes.get('/appointments', AuthMiddleware, AppointmentController.index);
 routes.delete(
   '/appointments/:id',
