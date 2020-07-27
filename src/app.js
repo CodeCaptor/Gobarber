@@ -1,11 +1,13 @@
 import 'dotenv/config';
-
+import RateLimit from 'express-rate-limit';
 import express from 'express';
 import 'express-async-errors';
 import path from 'path';
 import Youch from 'youch';
 import cors from 'cors';
 import * as Sentry from '@sentry/node';
+import helmet from 'helmet';
+import rateLimitConfig from './config/rateLimit';
 import sentryConfig from './config/sentry';
 import routes from './routes';
 import './database';
@@ -22,11 +24,15 @@ class App {
   middlewares() {
     this.server.use(Sentry.Handlers.requestHandler());
     this.server.use(cors());
+    this.server.use(helmet());
     this.server.use(express.json());
     this.server.use(
       '/files',
       express.static(path.resolve(__dirname, '..', 'tmp', 'uploads'))
     );
+    if (process.env.NODE_ENV !== 'development') {
+      this.server.use(new RateLimit(rateLimitConfig));
+    }
   }
 
   routes() {
